@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Calculadora Trabalhista para estimativas de verbas trabalhistas.">
+  <title>Calculadora Trabalhista</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="w-full min-h-screen bg-gray-50 text-gray-900">
+
+<header class="hero relative w-full overflow-hidden">
+  <img
+    src="assets/images/hero-cena.png"
+    alt="Trecho de código e painel de valores com gráfico ascendente, remetendo a cálculos trabalhistas"
+    class="hero-bg"
+  >
+  <div class="hero-overlay"></div>
+
+  <div class="hero-content relative z-10">
+    <div class="hero-badge">TECNOLOGIA • NEGÓCIOS • CÁLCULOS</div>
+    <h1>CÁLCULO<br><span>TRABALHISTA</span></h1>
+    <p>Calcule suas verbas trabalhistas de forma rápida, prática e organizada.</p>
+  </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-4 py-8">
+
+<div class="version-badge">Versão 2.0 — motor de cálculos reconstruído, com memória de cálculo detalhada</div>
+
+<nav class="calculator-nav" role="tablist" aria-label="Calculadoras Trabalhistas">
+  <button class="tab-btn tab-active" data-tab="rescisao" role="tab" aria-selected="true">
+    <span class="nav-icon">▣</span><span>Rescisão</span>
+  </button>
+  <button class="tab-btn" data-tab="extras" role="tab" aria-selected="false">
+    <span class="nav-icon">◷</span><span>Horas Extras</span>
+  </button>
+  <button class="tab-btn" data-tab="ferias" role="tab" aria-selected="false">
+    <span class="nav-icon">☂</span><span>Férias</span>
+  </button>
+  <button class="tab-btn" data-tab="decimo" role="tab" aria-selected="false">
+    <span class="nav-icon">$</span><span>13º Salário</span>
+  </button>
+  <button class="tab-btn" data-tab="fgts" role="tab" aria-selected="false">
+    <span class="nav-icon">⬡</span><span>FGTS</span>
+  </button>
+  <button class="tab-btn" data-tab="acordo" role="tab" aria-selected="false">
+    <span class="nav-icon">♢</span><span>Acordo Trabalhista</span>
+  </button>
+</nav>
+
+<!-- RESCISÃO -->
+<section id="panel-rescisao" class="tab-panel active">
+  <div class="calc-card">
+    <div class="calc-card-header">
+      <span class="nav-icon">▣</span>
+      <div>
+        <h2>Rescisão</h2>
+        <p>Estimativa completa das verbas rescisórias conforme o tipo de desligamento</p>
+      </div>
+    </div>
+    <div class="calc-card-body">
+
+      <div class="info-box">
+        <strong>Como funciona:</strong> escolha o tipo de rescisão e preencha as datas do contrato.
+        O sistema calcula automaticamente saldo de salário, aviso prévio (com projeção quando indenizado),
+        13º proporcional, férias vencidas e proporcionais + 1/3, FGTS estimado e multa rescisória —
+        mostrando a fórmula usada em cada valor.
+      </div>
+
+      <form id="form-rescisao" class="grid sm:grid-cols-2 gap-4" novalidate>
+        <div class="field"><label>Salário Bruto (R$)</label><input id="res-salario" type="number" step="0.01" min="0" required></div>
+
+        <div class="field">
+          <label>Tipo de Rescisão</label>
+          <select id="res-tipo">
+            <option value="sem_justa">Demissão sem Justa Causa</option>
+            <option value="pedido">Pedido de Demissão</option>
+            <option value="acordo">Acordo (Art. 484-A CLT)</option>
+            <option value="justa_causa">Justa Causa</option>
+            <option value="experiencia">Contrato de Experiência / Prazo Determinado</option>
+          </select>
+        </div>
+
+        <div class="field"><label>Data de Admissão</label><input id="res-admissao" type="date" required></div>
+        <div class="field"><label>Data de Demissão / Comunicação</label><input id="res-demissao" type="date" required></div>
+
+        <div class="field" id="res-fim-contrato-wrap" style="display:none">
+          <label>Data Prevista de Término do Contrato</label>
+          <input id="res-fim-contrato" type="date">
+          <p class="field-hint">Usada para calcular a indenização do art. 479 quando o contrato por prazo determinado é rompido antes do fim.</p>
+        </div>
+
+        <div class="field" id="res-aviso-modalidade-wrap">
+          <label>Modalidade do Aviso Prévio</label>
+          <select id="res-aviso-modalidade">
+            <option value="indenizado">Indenizado (não trabalhado)</option>
+            <option value="trabalhado">Trabalhado</option>
+          </select>
+          <p class="field-hint">O aviso indenizado projeta o fim do contrato, contando como tempo de serviço para 13º, férias e FGTS.</p>
+        </div>
+
+        <div class="field" id="res-aviso-cumprido-wrap" style="display:none">
+          <label>Cumpriu o Aviso Prévio de 30 dias?</label>
+          <select id="res-aviso-cumprido">
+            <option value="sim">Sim</option>
+            <option value="nao">Não</option>
+          </select>
+          <p class="field-hint">Se não cumprido, a empresa pode descontar até 30 dias de salário.</p>
+        </div>
+
+        <div class="field"><label>Dias Trabalhados no Mês da Saída (saldo de salário)</label><input id="res-saldo-dias" type="number" min="0" max="31" required></div>
+
+        <div class="field"><label>Possui Férias Vencidas (período completo não gozado)?</label>
+          <select id="res-ferias-vencidas">
+            <option value="0">Não</option>
+            <option value="1">Sim</option>
+          </select>
+        </div>
+
+        <div class="sm:col-span-2 field-checkbox">
+          <label><input type="checkbox" id="res-calcular-descontos"> Calcular descontos estimados de INSS/IRRF sobre saldo de salário e 13º</label>
+        </div>
+
+        <div class="sm:col-span-2"><button type="submit" class="calc-btn">Calcular Rescisão</button></div>
+      </form>
+      <div id="result-rescisao" class="result"></div>
+    </div>
+  </div>
+</section>
+
+<!-- HORAS EXTRAS -->
+<section id="panel-extras" class="tab-panel">
+  <div class="calc-card">
+    <div class="calc-card-header">
+      <span class="nav-icon">◷</span>
+      <div>
+        <h2>Horas Extras + DSR</h2>
+        <p>Valor devido pelas horas extras trabalhadas, com Descanso Semanal Remunerado</p>
+      </div>
+    </div>
+    <div class="calc-card-body">
+
+      <div class="info-box">
+        <strong>Como funciona:</strong> informe o salário, a jornada mensal e a quantidade de horas extras.
+        O DSR é calculado proporcionalmente aos dias úteis e de descanso do mês (ajustáveis abaixo).
+      </div>
+
+      <form id="form-extras" class="grid sm:grid-cols-2 gap-4" novalidate>
+        <div class="field"><label>Salário Bruto (R$)</label><input id="ext-salario" type="number" step="0.01" min="0" required></div>
+        <div class="field"><label>Horas/Mês (jornada)</label><input id="ext-horas-mes" type="number" value="220" min="1" required></div>
+        <div class="field"><label>Qtd Horas Extras</label><input id="ext-qtd" type="number" step="0.5" min="0" required></div>
+        <div class="field"><label>Percentual</label>
+          <select id="ext-perc">
+            <option value="50">50%</option>
+            <option value="100">100%</option>
+          </select>
+        </div>
+        <div class="field"><label>Dias Úteis no Mês</label><input id="ext-dias-uteis" type="number" value="25" min="1" max="31" required></div>
+        <div class="field"><label>Domingos e Feriados no Mês</label><input id="ext-dias-descanso" type="number" value="5" min="0" max="10" required></div>
+        <div class="sm:col-span-2"><button type="submit" class="calc-btn">Calcular Horas Extras</button></div>
+      </form>
+      <div id="result-extras" class="result"></div>
+    </div>
+  </div>
+</section>
+
+<!-- FÉRIAS -->
+<section id="panel-ferias" class="tab-panel">
+  <div class="calc-card">
+    <div class="calc-card-header">
+      <span class="nav-icon">☂</span>
+      <div>
+        <h2>Férias</h2>
+        <p>Valor das férias, 1/3 constitucional e abono pecuniário</p>
+      </div>
+    </div>
+    <div class="calc-card-body">
+
+      <div class="info-box">
+        <strong>Como funciona:</strong> faltas injustificadas no período aquisitivo reduzem os dias de direito
+        (art. 130 da CLT). Selecione a faixa de faltas para preencher os dias automaticamente, ou ajuste manualmente.
+      </div>
+
+      <form id="form-ferias" class="grid sm:grid-cols-2 gap-4" novalidate>
+        <div class="field"><label>Salário Bruto (R$)</label><input id="fer-salario" type="number" step="0.01" min="0" required></div>
+        <div class="field"><label>Faltas Injustificadas no Período</label>
+          <select id="fer-faltas">
+            <option value="0">0 a 5 faltas (30 dias)</option>
+            <option value="6">6 a 14 faltas (24 dias)</option>
+            <option value="15">15 a 23 faltas (18 dias)</option>
+            <option value="24">24 a 32 faltas (12 dias)</option>
+            <option value="33">Mais de 32 faltas (perde o direito)</option>
+          </select>
+        </div>
+        <div class="field"><label>Dias de Férias</label><input id="fer-dias" type="number" value="30" min="0" max="30" required></div>
+        <div class="field"><label>Abono Pecuniário?</label>
+          <select id="fer-abono">
+            <option value="0">Não</option>
+            <option value="1">Sim (vender 10 dias)</option>
+          </select>
+        </div>
+        <div class="sm:col-span-2"><button type="submit" class="calc-btn">Calcular Férias</button></div>
+      </form>
+      <div id="result-ferias" class="result"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 13º SALÁRIO -->
+<section id="panel-decimo" class="tab-panel">
+  <div class="calc-card">
+    <div class="calc-card-header">
+      <span class="nav-icon">$</span>
+      <div>
+        <h2>13º Salário</h2>
+        <p>Valor proporcional do décimo terceiro, por avos e por parcela</p>
+      </div>
+    </div>
+    <div class="calc-card-body">
+
+      <div class="info-box">
+        <strong>Como funciona:</strong> os meses trabalhados são contados automaticamente entre a admissão
+        (ou 1º de janeiro) e a data de referência, aplicando a regra dos 15 dias (fração ≥ 15 dias conta como mês cheio).
+      </div>
+
+      <form id="form-decimo" class="grid sm:grid-cols-2 gap-4" novalidate>
+        <div class="field"><label>Salário Bruto (R$)</label><input id="dec-salario" type="number" step="0.01" min="0" required></div>
+        <div class="field"><label>Data de Admissão</label><input id="dec-admissao" type="date" required></div>
+        <div class="field"><label>Data de Referência</label><input id="dec-referencia" type="date" required>
+          <p class="field-hint">Use 31/12 do ano para o cálculo cheio, ou a data de saída em caso de rescisão.</p>
+        </div>
+        <div class="field"><label>Parcela</label>
+          <select id="dec-parcela">
+            <option value="integral">Valor Integral</option>
+            <option value="primeira">1ª Parcela (até 50%, sem desconto)</option>
+            <option value="segunda">2ª Parcela (com desconto)</option>
+          </select>
+        </div>
+        <div class="sm:col-span-2 field-checkbox">
+          <label><input type="checkbox" id="dec-calcular-descontos" checked> Calcular descontos estimados de INSS/IRRF</label>
+        </div>
+        <div class="sm:col-span-2"><button type="submit" class="calc-btn">Calcular 13º Salário</button></div>
+      </form>
+      <div id="result-decimo" class="result"></div>
+    </div>
+  </div>
+</section>
+
+<!-- FGTS -->
+<section id="panel-fgts" class="tab-panel">
+  <div class="calc-card">
+    <div class="calc-card-header">
+      <span class="nav-icon">⬡</span>
+      <div>
+        <h2>FGTS</h2>
+        <p>Estimativa do saldo depositado e da multa rescisória</p>
+      </div>
+    </div>
+    <div class="calc-card-body">
+
+      <div class="info-box">
+        <strong>Como funciona:</strong> estimativa simplificada de 8% do salário por mês de contrato.
+        Não substitui o extrato oficial da Caixa Econômica Federal, que inclui correção monetária e depósitos sobre 13º/férias.
+      </div>
+
+      <form id="form-fgts" class="grid sm:grid-cols-2 gap-4" novalidate>
+        <div class="field"><label>Salário Bruto (R$)</label><input id="fgts-salario" type="number" step="0.01" min="0" required></div>
+        <div class="field"><label>Data de Admissão</label><input id="fgts-admissao" type="date" required></div>
+        <div class="field"><label>Data de Referência</label><input id="fgts-referencia" type="date" required></div>
+        <div class="field"><label>Tipo de Saída (para calcular multa)</label>
+          <select id="fgts-tipo-saida">
+            <option value="nenhuma">Ainda empregado / não se aplica</option>
+            <option value="sem_justa">Demissão sem Justa Causa (multa 40%)</option>
+            <option value="acordo">Acordo Art. 484-A (multa 20%)</option>
+            <option value="pedido">Pedido de Demissão (sem multa)</option>
+            <option value="justa_causa">Justa Causa (sem multa)</option>
+          </select>
+        </div>
+        <div class="sm:col-span-2"><button type="submit" class="calc-btn">Calcular FGTS</button></div>
+      </form>
+      <div id="result-fgts" class="result"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ACORDO TRABALHISTA -->
+<section id="panel-acordo" class="tab-panel">
+  <div class="calc-card">
+    <div class="calc-card-header">
+      <span class="nav-icon">♢</span>
+      <div>
+        <h2>Acordo Trabalhista</h2>
+        <p>Simulação de acordo com desconto negociado e parcelamento</p>
+      </div>
+    </div>
+    <div class="calc-card-body">
+
+      <div class="info-box">
+        <strong>Como funciona:</strong> simule o valor final de um acordo (judicial ou extrajudicial) a partir
+        do total de verbas devidas, o percentual de desconto negociado e o número de parcelas.
+      </div>
+
+      <form id="form-acordo" class="grid sm:grid-cols-2 gap-4" novalidate>
+        <div class="field"><label>Valor Total das Verbas (R$)</label><input id="aco-valor" type="number" step="0.01" min="0" required></div>
+        <div class="field"><label>Desconto Negociado (%)</label><input id="aco-desconto" type="number" value="20" min="0" max="100" required></div>
+        <div class="field"><label>Parcelas</label><input id="aco-parcelas" type="number" value="1" min="1" max="24" required></div>
+        <div class="sm:col-span-2"><button type="submit" class="calc-btn">Calcular Acordo</button></div>
+      </form>
+      <div id="result-acordo" class="result"></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <p>Calculadora Trabalhista — valores estimativos, calculados com base em regras gerais da CLT e tabelas de referência de INSS/IRRF.
+  Não substitui orientação de contador(a) ou advogado(a) trabalhista, especialmente em casos com convenção coletiva, benefícios específicos ou controvérsias jurídicas.</p>
+</footer>
+
+<script src="assets/js/app.js"></script>
+</body>
+</html>
